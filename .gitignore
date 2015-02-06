@@ -23,11 +23,5 @@ rebel.xml
 raptor.xml
 var/cache
 jarsToSkip.txt
+node_modules
 
-# It's upsetting, but we need to keep some of temp_config_*.xml under version control
-temp_persist_config_001.xml
-temp_persist_config_005.xml
-temp_persist_config_012.xml
-temp_persist_config_015.xml
-temp_persist_config_021.xml
-temp_persist_config_023.xml
