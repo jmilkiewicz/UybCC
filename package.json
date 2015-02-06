@@ -1,0 +1,11 @@
+{
+  "name": "AxajCC",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/start"
+  },
+  "dependencies": {
+    "node-static": "^0.7.6"
+  }
+}
