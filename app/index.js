@@ -19,6 +19,7 @@ function responseBody(userId) {
 var fileServer = new static.Server("./www");
 
 module.exports = function (request, response) {
+	//TODO it is a hack how it works now, probably better to use express
 	fileServer.serve(request, response, function (err, result) {
 		console.log(err);
 		console.log(result);
