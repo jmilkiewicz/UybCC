@@ -123,7 +123,6 @@
         var userStatus = {};
 
         function buildUserStatus(online) {
-            console.log(online);
             if(online){
                 return userOnline();
             }
@@ -136,7 +135,6 @@
             }).then(function(){
                 return getOnlineOfflineStatus(currentUserId)
             }).then(function(onlineOffline){
-                console.log(onlineOffline)
                 userStatus[currentUserId] = buildUserStatus(onlineOffline.online);
             }).catch(function(err){
                 userStatus[currentUserId] = userStatusError(err);
