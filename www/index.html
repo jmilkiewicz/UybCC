@@ -54,7 +54,7 @@
         }
 
 
-        var signalStartUpload = function () {
+        var onGetUserStatusStart = function () {
             var singleBarExample = $('.book.example').removeClass('example');
             singleBarExample.remove();
             return function(userId) {
@@ -67,7 +67,7 @@
 
         }();
 
-        function signalStopUpload(userId) {
+        function onGetUserStatusEnd(userId) {
                 $(".book#"+userId).find("img").hide();
                 console.log("end",userId);
         }
@@ -78,7 +78,7 @@
 
         var completed = userIds.reduce(function(promise, currentUserId){
             return promise.then(function(){
-                signalStartUpload(currentUserId)
+                onGetUserStatusStart(currentUserId)
             }).then(function(){
                 return getOnlineOfflineStatus(currentUserId)
             }).then(function(onlineOffline){
@@ -86,7 +86,7 @@
             }).catch(function(err){
                 userStatus[currentUserId] = err;
             }).then(function(){
-                signalStopUpload(currentUserId);
+                onGetUserStatusEnd(currentUserId);
             });
         },Promise.resolve())
 
