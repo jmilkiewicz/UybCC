@@ -58,25 +58,18 @@
             var singleBarExample = $('.book.example').removeClass('example');
             singleBarExample.remove();
             return function(userId) {
-                return new Promise(function (resolve, reject) {
                     var clone = singleBarExample.clone(false);
                     clone.attr('id', userId);
                     var titleLink = clone.find('.title');
                     titleLink.text("user: " + userId);
                     $('.progressBars').append(clone);
-                    resolve();
-                });
             }
 
         }();
 
         function signalStopUpload(userId) {
-            return new Promise(function(resolve, reject) {
                 $(".book#"+userId).find("img").hide();
                 console.log("end",userId);
-                resolve();
-            })
-
         }
 
         var N = 600;
@@ -85,7 +78,7 @@
 
         var completed = userIds.reduce(function(promise, currentUserId){
             return promise.then(function(){
-                return signalStartUpload(currentUserId)
+                signalStartUpload(currentUserId)
             }).then(function(){
                 return getOnlineOfflineStatus(currentUserId)
             }).then(function(onlineOffline){
@@ -93,7 +86,7 @@
             }).catch(function(err){
                 userStatus[currentUserId] = err;
             }).then(function(){
-                return signalStopUpload(currentUserId);
+                signalStopUpload(currentUserId);
             });
         },Promise.resolve())
 
