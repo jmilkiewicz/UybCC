@@ -12,17 +12,14 @@
 
 <body>
 <div class="progressBars">
-    <article class="book example">
+    <article class="userStatus example">
         <h1 class="title">${title}</h1>
         <img class="loader" src="image/ajax-loader-dark.gif">
         <img class="online" src="image/online.png">
         <img class="offline" src="image/offline.png">
         <img class="error" src="image/error.jpg">
     </article>
-
 </div>
-
-
 </body>
 
 <script>
@@ -95,7 +92,7 @@
 
 
         var onGetUserStatusStart = function () {
-            var singleBarExample = $('.book.example').removeClass('example');
+            var singleBarExample = $('.userStatus.example').removeClass('example');
             singleBarExample.remove();
             return function(userId) {
                     var clone = singleBarExample.clone(false);
@@ -112,7 +109,7 @@
         }();
 
         function onGetUserStatusEnd(userId) {
-                var elem = $(".book#"+userId);
+                var elem = $(".userStatus#"+userId);
                 elem.find("img").hide();
                 userStatus[userId].render(elem);
                 console.log("end",userId);
