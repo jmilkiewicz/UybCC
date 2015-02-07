@@ -37,6 +37,18 @@
         }
 
 
+        function submitAggregatedStatusBack(aggregateStatus) {
+            return new Promise(function(resolve, reject) {
+                $.ajax( "/sss?user_id="+userId )
+                        .done(function(data) {
+                            resolve(data);
+                        })
+                        .fail(function() {
+                            reject(Error('Unable to get user status:'));
+                        })
+            })
+        }
+
         var userOnline = function(){
             var online= true;
             return {
@@ -94,7 +106,14 @@
                 var elem = $(".userStatus#"+userId);
                 elem.find("img").hide();
                 userStatus[userId].render(elem);
-                console.log("end",userId);
+        }
+
+        function buildAggregatedStatus() {
+            var result = Object.keys(userStatus).reduce(function (previous, key) {
+                previous[key] = userStatus[key].status();
+                return previous;
+            }, {});
+            return result;
         }
 
         var N = 100;
@@ -108,7 +127,7 @@
             return userOffline();
 
         }
-        var completed = userIds.reduce(function(promise, currentUserId){
+        var userStatusesFetched = userIds.reduce(function(promise, currentUserId){
             return promise.then(function(){
                 onGetUserStatusStart(currentUserId)
             }).then(function(){
@@ -122,14 +141,10 @@
             });
         },Promise.resolve())
 
-        completed.then(function(){
-            var payload = Object.keys(userStatus).reduce(function(previous, key){
-               previous[key] = userStatus[key].status();
-               return previous;
-            }, {});
-
-            console.log(payload);
-
+        userStatusesFetched.then(function(){
+            return submitAggregatedStatusBack(buildAggregatedStatus())
+        }).then(function(){
+            console.log("SUCCESS");
         })
 
 
