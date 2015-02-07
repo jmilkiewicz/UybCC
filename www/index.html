@@ -7,92 +7,103 @@
 
     <title>Promise example</title>
 
-    <link rel="stylesheet" href="">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <script src="js/jquery-2.1.3.min.js"></script>
 </head>
 
 <body>
-<h1>Promise example</h1>
+<div class="progressBars">
+    <article class="book example">
+        <h1 class="title">${title}</h1> <img class="loader" src="image/ajax-loader-dark.gif">
+    </article>
 
-<p>Darth Vader image by <a href="https://www.flickr.com/photos/digital_stability/">Shawn Taylor</a>, published under a <a href="https://creativecommons.org/licenses/by-nc-nd/2.0/">Attribution-NonCommercial-NoDerivs 2.0 Generic</a> license.</p>
+</div>
+
+
 </body>
 
 <script>
 
-    function getOnlineOfflineStatus(userId) {
-        return new Promise(function(resolve, reject) {
-            // Standard XHR to load an image
-            var request = new XMLHttpRequest();
+        function getOnlineOfflineStatus(userId) {
+            return new Promise(function(resolve, reject) {
+                // Standard XHR to load an image
+                var request = new XMLHttpRequest();
 
-            request.open('GET', "/sss?user_id="+userId);
-            //request.responseType = 'blob';
+                request.open('GET', "/sss?user_id="+userId);
+                //request.responseType = 'blob';
 
-            // When the request loads, check whether it was successful
-            request.onload = function() {
-                if (request.status === 200) {
-                    // If successful, resolve the promise by passing back the request response
-                    resolve(request.response);
-                } else {
-                    // If it fails, reject the promise with a error message
-                    reject(Error('Image didn\'t load successfully; error code:' + request.statusText));
-                }
-            };
+                // When the request loads, check whether it was successful
+                request.onload = function() {
+                    if (request.status === 200) {
+                        // If successful, resolve the promise by passing back the request response
+                        resolve(request.response);
+                    } else {
+                        // If it fails, reject the promise with a error message
+                        reject(Error('Unable to get user status:' + request.statusText));
+                    }
+                };
 
-            request.onerror = function() {
-                // Also deal with the case when the entire request fails to begin with
-                // This is probably a network error, so reject the promise with an appropriate message
-                reject(Error('There was a network error.'));
-            };
+                request.onerror = function() {
+                    // Also deal with the case when the entire request fails to begin with
+                    // This is probably a network error, so reject the promise with an appropriate message
+                    reject(Error('network error.'));
+                };
 
-            // Send the request
-            request.send();
-        }).then(JSON.parse);
-    }
+                // Send the request
+                request.send();
+            }).then(JSON.parse);
+        }
 
 
-    function signalStartUpload(userId) {
-        return new Promise(function(resolve, reject) {
-            console.log("start",userId);
-            resolve();
-        })
+        var signalStartUpload = function () {
+            var singleBarExample = $('.book.example').removeClass('example');
+            singleBarExample.remove();
+            return function(userId) {
+                return new Promise(function (resolve, reject) {
+                    var clone = singleBarExample.clone(false);
+                    clone.attr('id', userId);
+                    var titleLink = clone.find('.title');
+                    titleLink.text("user: " + userId);
+                    $('.progressBars').append(clone);
+                    resolve();
+                });
+            }
 
-    }
+        }();
 
-    function signalStopUpload(userId) {
-        return new Promise(function(resolve, reject) {
-            console.log("end",userId);
-            resolve();
-        })
+        function signalStopUpload(userId) {
+            return new Promise(function(resolve, reject) {
+                $(".book#"+userId).find("img").hide();
+                console.log("end",userId);
+                resolve();
+            })
 
-    }
+        }
 
-    var N = 600;
-    var userIds = Array.apply(null, {length: N}).map(Number.call, Number);
+        var N = 600;
+        var userIds = Array.apply(null, {length: N}).map(Number.call, Number);
+        var userStatus = {};
 
-    var userStatus = {};
-
-    var completed = userIds.reduce(function(promise, currentUserId){
-        return promise.then(function(){
-            return currentUserId;
-        }).then(function(userId){
-            return signalStartUpload(userId).then(function(){
-                return getOnlineOfflineStatus(userId)
-            }).then(function(onlineOffline){
-                return signalStopUpload(userId).then(function(){
+        var completed = userIds.reduce(function(promise, currentUserId){
+            return promise.then(function(){
+                return currentUserId;
+            }).then(function(userId){
+                return signalStartUpload(userId).then(function(){
+                    return getOnlineOfflineStatus(userId)
+                }).then(function(onlineOffline){
                     userStatus[userId] = onlineOffline.online;
-                })
-            }).catch(function(err){
-                userStatus[userId] = err;
-            });
-        })
-    },Promise.resolve())
+                }).catch(function(err){
+                    userStatus[userId] = err;
+                }).then(function(){
+                    return signalStopUpload(userId)
+                });
+            })
+        },Promise.resolve())
 
-    completed.then(function(){
-        console.log("done");
-        console.log(userStatus);
-    })
+        completed.then(function(){
+            console.log("done");
+            console.log(userStatus);
+        })
+
 
 </script>
 </html>
