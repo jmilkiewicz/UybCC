@@ -85,18 +85,16 @@
 
         var completed = userIds.reduce(function(promise, currentUserId){
             return promise.then(function(){
-                return currentUserId;
-            }).then(function(userId){
-                return signalStartUpload(userId).then(function(){
-                    return getOnlineOfflineStatus(userId)
-                }).then(function(onlineOffline){
-                    userStatus[userId] = onlineOffline.online;
-                }).catch(function(err){
-                    userStatus[userId] = err;
-                }).then(function(){
-                    return signalStopUpload(userId)
-                });
-            })
+                return signalStartUpload(currentUserId)
+            }).then(function(){
+                return getOnlineOfflineStatus(currentUserId)
+            }).then(function(onlineOffline){
+                userStatus[currentUserId] = onlineOffline.online;
+            }).catch(function(err){
+                userStatus[currentUserId] = err;
+            }).then(function(){
+                return signalStopUpload(currentUserId);
+            });
         },Promise.resolve())
 
         completed.then(function(){
