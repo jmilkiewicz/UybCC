@@ -13,7 +13,11 @@
 <body>
 <div class="progressBars">
     <article class="book example">
-        <h1 class="title">${title}</h1> <img class="loader" src="image/ajax-loader-dark.gif">
+        <h1 class="title">${title}</h1>
+        <img class="loader" src="image/ajax-loader-dark.gif">
+        <img class="online" src="image/online.png">
+        <img class="offline" src="image/offline.png">
+        <img class="error" src="image/error.jpg">
     </article>
 
 </div>
@@ -54,6 +58,42 @@
         }
 
 
+        var userOnline = function(){
+            var online= true;
+            return {
+                render: function(elem){
+                    elem.find(".online").show();
+                },
+                status : function(){
+                    return {online:online}
+                }
+            }
+        }
+
+        var userOffline = function(){
+            var online= false;
+            return {
+                render: function(elem){
+                    elem.find(".offline").show();
+                },
+                status : function(){
+                    return {online:online}
+                }
+            }
+        }
+
+        var userStatusError = function(err){
+            return {
+                render: function(elem){
+                    elem.find(".error").show();
+                },
+                status : function(){
+                    return {error:err}
+                }
+            }
+        }
+
+
         var onGetUserStatusStart = function () {
             var singleBarExample = $('.book.example').removeClass('example');
             singleBarExample.remove();
@@ -62,37 +102,55 @@
                     clone.attr('id', userId);
                     var titleLink = clone.find('.title');
                     titleLink.text("user: " + userId);
+                    clone.find("img").hide();
+                    clone.find(".loader").show();
                     $('.progressBars').append(clone);
+
+
             }
 
         }();
 
         function onGetUserStatusEnd(userId) {
-                $(".book#"+userId).find("img").hide();
+                var elem = $(".book#"+userId);
+                elem.find("img").hide();
+                userStatus[userId].render(elem);
                 console.log("end",userId);
         }
 
-        var N = 600;
+        var N = 100;
         var userIds = Array.apply(null, {length: N}).map(Number.call, Number);
         var userStatus = {};
 
+        function buildUserStatus(online) {
+            if(online){
+                return userOnline();
+            }
+            return userOffline();
+
+        }
         var completed = userIds.reduce(function(promise, currentUserId){
             return promise.then(function(){
                 onGetUserStatusStart(currentUserId)
             }).then(function(){
                 return getOnlineOfflineStatus(currentUserId)
             }).then(function(onlineOffline){
-                userStatus[currentUserId] = onlineOffline.online;
+                userStatus[currentUserId] = buildUserStatus(onlineOffline.online);
             }).catch(function(err){
-                userStatus[currentUserId] = err;
+                userStatus[currentUserId] = userStatusError(err);
             }).then(function(){
                 onGetUserStatusEnd(currentUserId);
             });
         },Promise.resolve())
 
         completed.then(function(){
-            console.log("done");
-            console.log(userStatus);
+            var payload = Object.keys(userStatus).reduce(function(previous, key){
+               previous[key] = userStatus[key].status();
+               return previous;
+            }, {});
+
+            console.log(payload);
+
         })
 
 
