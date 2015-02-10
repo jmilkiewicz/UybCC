@@ -3,8 +3,11 @@ var router = express.Router();
 
 /* GET users listing. */
 router.get('/:userId([0-9]+)', function(req, res, next) {
-  var userStatus = getUserStatus(parseInt(req.params.userId));
-  res.json(userStatus);
+  setTimeout(function(){
+    var userStatus = getUserStatus(parseInt(req.params.userId));
+    res.json(userStatus);
+  },200)
+
 });
 
 router.post('/', function(req, res, next) {
