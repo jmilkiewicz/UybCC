@@ -11,7 +11,7 @@ router.get('/:userId([0-9]+)', function(req, res, next) {
 });
 
 router.post('/', function(req, res, next) {
-  res.status(201).end();
+  res.status(204).end();
 });
 
 function getUserStatus(userId) {
