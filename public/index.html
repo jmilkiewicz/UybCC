@@ -122,26 +122,23 @@
         var userIds = Array.apply(null, {length: N}).map(Number.call, Number);
         var userStatus = {};
 
-        function buildUserStatus(online) {
-            if(online){
-                return userOnline();
-            }
-            return userOffline();
-
-        }
+        var statusObjects={
+            "true": userOnline,
+            "false":userOffline
+        };
         var userStatusesFetched = userIds.reduce(function(promise, currentUserId){
             return promise.then(function(){
                 onGetUserStatusStart(currentUserId)
             }).then(function(){
                 return getOnlineOfflineStatus(currentUserId)
             }).then(function(onlineOffline){
-                userStatus[currentUserId] = buildUserStatus(onlineOffline.online);
+                userStatus[currentUserId] = statusObjects[onlineOffline.online](onlineOffline.initData);
             }).catch(function(err){
                 userStatus[currentUserId] = userStatusError(err);
             }).then(function(){
                 onGetUserStatusEnd(currentUserId);
             });
-        },Promise.resolve())
+        },Promise.resolve());
 
         userStatusesFetched.then(function(){
             return submitAggregatedStatusBack(buildAggregatedStatus())
@@ -149,7 +146,7 @@
             console.log("SUCCESS");
         }).catch(function(){
             console.err("FAILURE");
-        })
+        });
 
 
 </script>
